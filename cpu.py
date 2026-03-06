@@ -1,7 +1,7 @@
 import psutil
 import time
 while (True){
-  cpu = psutil.cpu_percent (intervall=1)
+  cpu = psutil.cpu_percent (interval=1)
 
   print(f"le CPU est utiliser à : {cpu}")
 
