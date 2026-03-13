@@ -35,7 +35,6 @@ class StorageManager:
     def get_latest(self):
         rows = self.conn.execute("SELECT * FROM metrics").fetchall()
         return rows
-        self.conn.close()
 
 
 # Test
