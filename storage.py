@@ -15,12 +15,17 @@ class StorageManager:
             )
         """)
         self.conn.commit()
-
+        
+    def exists(self, sonde):
+        depuis = (datetime.now() - timedelta(minutes=5)).isoformat()
+        row = self.conn.execute("SELECT id FROM metrics WHERE sonde = ? AND timestamp > ?",(sonde, depuis)).fetchone()
+        return row is not None  # True si elle existe, False sinon
+    
     def save(self, sonde, valeur, unite):
-        self.conn.execute(
-            "INSERT INTO metrics (sonde, valeur, unite) VALUES (?, ?, ?)",
-            (sonde, valeur, unite)
-        )
+        if self.exists(sonde):
+            print(f"⚠ {sonde} déjà enregistré récemment, on ignore.")
+            return
+        self.conn.execute("INSERT INTO metrics (sonde, valeur, unite) VALUES (?, ?, ?)",(sonde, valeur, unite))
         self.conn.commit()
 
     def cleanup(self):
