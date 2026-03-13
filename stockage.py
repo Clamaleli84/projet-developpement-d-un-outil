@@ -17,7 +17,7 @@ conn.execute(
     ("cpu", 42.5, "%")
 )
 
-conn.commit()  #
+conn.commit() 
 
 # PUIS on lit
 rows = conn.execute("SELECT * FROM metrics").fetchall()
@@ -25,4 +25,4 @@ rows = conn.execute("SELECT * FROM metrics").fetchall()
 for row in rows:
     print(row)
 
-conn.close()  # 
+conn.close()  
