@@ -1,8 +1,8 @@
 import subprocess
 import psutil
-from storage import StorageManager
+from stockage import StorageManager
 
-storage = StorageManager()
+stockage = StorageManager()
 
 def collecter_cpu():
     """Sonde CPU via psutil (ton cpu.py)"""
