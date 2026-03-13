@@ -2,6 +2,7 @@ import json
 import os
 import smtplib
 from email.message import EmailMessage
+from stockage import StorageManager
 
 config_dir = "config"
 config_file = os.path.join(config_dir, "crisis_config.json")
@@ -43,22 +44,24 @@ def init_files():
         with open(template_file, 'w', encoding='utf-8') as f:
             f.write(template_defaut)
 
-def get_data_from_json():
-    if not os.path.exists(data_file):
-        return None
-    with open(data_file, 'r') as f:
-        data = json.load(f)
+def get_data_from_db():
+    storage = StorageManager()
+    rows = storage.get_latest()
     
-    row_data = data['data']
-    last_entry = row_data[-2]
-
-    if last_entry[0] is not None:
-        return {
-            "cpu": round(last_entry[0], 2),
-            "ram": round(last_entry[1], 2),
-            "disk": round(last_entry[2], 2),
-        }
-    return None
+    stats = {"cpu": None, "ram": None, "disk": None}
+    
+    for row in rows:
+        id, sonde, valeur, unite, timestamp = row
+        if sonde == "cpu" and stats["cpu"] is None:
+            stats["cpu"] = valeur
+        elif sonde == "ram" and stats["ram"] is None:
+            stats["ram"] = valeur
+        elif sonde == "disque" and stats["disk"] is None:
+            stats["disk"] = valeur
+    
+    if None in stats.values():
+        return None
+    return stats
 
 def send_mail(stats):
     with open(config_file, 'r') as f:
