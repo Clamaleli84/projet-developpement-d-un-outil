@@ -45,7 +45,7 @@ if item is not None:
 
     # Envoi au moteur de stockage
     subprocess.run([
-        "./stockage.sh",
+        "./storage.sh",
         "CERT",
         titre,
         date_pub,
