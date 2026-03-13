@@ -2,7 +2,7 @@ import json
 import os
 import smtplib
 from email.message import EmailMessage
-from stockage import StorageManager
+from storage import StorageManager
 
 config_dir = "config"
 config_file = os.path.join(config_dir, "crisis_config.json")
