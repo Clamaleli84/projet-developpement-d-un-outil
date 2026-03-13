@@ -1,6 +1,5 @@
 import pygal
 from storage import StorageManager
-import cairosvg
 
 def generer_graphique(sonde):
     storage = StorageManager()
