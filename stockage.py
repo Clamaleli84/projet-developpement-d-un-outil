@@ -35,10 +35,3 @@ class StorageManager:
     def get_latest(self):
         rows = self.conn.execute("SELECT * FROM metrics").fetchall()
         return rows
-
-
-# Test
-storage = StorageManager()
-storage.save("cpu", 42.5, "%")
-storage.cleanup()
-storage.get_latest()
