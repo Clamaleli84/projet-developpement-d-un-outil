@@ -1,5 +1,5 @@
 import pygal
-from stockage import StorageManager
+from storage import StorageManager
 import cairosvg
 
 def generer_graphique(sonde):
