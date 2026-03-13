@@ -10,4 +10,7 @@ req = urllib.request.Request(
 with urllib.request.urlopen(req) as response:
     html = response.read().decode("utf-8")
 
-print(html[:500])
+# Afficher seulement les lignes avec "alerte"
+for ligne in html.split("\n"):
+    if "alerte" in ligne.lower():
+        print(ligne.strip())
