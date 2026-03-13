@@ -1,5 +1,5 @@
 import pygal
-from stockage import StorageManager
+from storage import StorageManager
 
 def generer_graphique(sonde):
     storage = StorageManager()
