@@ -3,6 +3,7 @@ import os
 import smtplib
 from email.message import EmailMessage
 from storage import StorageManager
+from graphique import generer_graphique
 
 config_dir = "config"
 config_file = os.path.join(config_dir, "crisis_config.json")
@@ -62,6 +63,13 @@ def get_data_from_db():
     if None in stats.values():
         return None
     return stats
+    
+if is_crisis:
+    print(f"ALERTE CRISE ! CPU:{stats['cpu']} RAM:{stats['ram']} DISK:{stats['disk']}")
+    generer_graphique("cpu")      # ← générer avant d'envoyer
+    generer_graphique("ram")
+    generer_graphique("disque")
+    send_mail(stats)
 
 def send_mail(stats):
     with open(config_file, 'r') as f:
@@ -75,12 +83,24 @@ def send_mail(stats):
     msg['From'] = config["smtp_user"]
     msg['To'] = config["admin_email"]
 
+    # Joindre les graphiques SVG
+    for sonde in ["cpu", "ram", "disque"]:
+        fichier = f"{sonde}.svg"
+        if os.path.exists(fichier):
+            with open(fichier, 'rb') as f:
+                msg.add_attachment(
+                    f.read(),
+                    maintype='image',
+                    subtype='svg+xml',
+                    filename=fichier
+                )
+            print(f"Pièce jointe ajoutée : {fichier}")
+
     try:
-        # Pour le port 465, on utilise SMTP_SSL directement
         with smtplib.SMTP_SSL(config["smtp_server"], config["smtp_port"]) as server:
             server.login(config["smtp_user"], config["smtp_pass"])
             server.send_message(msg)
-        print("Mail envoyé avec succès via le serveur de l'université.")
+        print("Mail envoyé avec succès.")
     except Exception as e:
         print(f"Erreur d'envoi SMTP : {e}")
 
