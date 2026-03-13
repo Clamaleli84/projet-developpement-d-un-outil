@@ -13,8 +13,8 @@ config_defaut = {
     "cpu_threshold": 0.0,
     "ram_threshold": 85.0,
     "disk_threshold": 90.0,
-    "admin_email": "matteo.jaubert@alumni.univ-avignon.fr",
-    "smtp_server": "pedago.univ-avignon.fr",
+    "admin_email": "leo.jaubert@alumni.univ-avignon.fr",
+    "smtp_server": "partage",
     "smtp_port": 465,
     "smtp_user": "leo.jaubert@alumni.univ-avignon.fr",
     "smtp_pass": "mdp"
