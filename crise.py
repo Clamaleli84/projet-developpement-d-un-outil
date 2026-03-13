@@ -85,7 +85,7 @@ def send_mail(stats):
         print(f"Erreur d'envoi SMTP : {e}")
 
 init_files()
-stats = get_data_from_json()
+stats = get_data_from_db()
 
 if stats:
     with open(config_file, 'r') as f:
