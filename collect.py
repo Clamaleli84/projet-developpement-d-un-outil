@@ -51,5 +51,5 @@ if __name__ == "__main__":
     collecter_disque()
     print("\n=== Dernières valeurs stockées ===")
     for row in storage.get_latest():
-        sonde, valeur, unite, ts = row
+        id, sonde, valeur, unite, ts = row  # ← 5 variables
         print(f"[{ts}] {sonde:8s} → {valeur:.1f}{unite}")
