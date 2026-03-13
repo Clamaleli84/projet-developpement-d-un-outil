@@ -1,32 +1,48 @@
 import sqlite3
 from datetime import datetime, timedelta
 
-conn = sqlite3.connect('metrics.db')
+class StorageManager:
 
-conn.execute("""
-    CREATE TABLE IF NOT EXISTS metrics (
-        id        INTEGER PRIMARY KEY AUTOINCREMENT,
-        sonde     TEXT,
-        valeur    REAL,
-        unite     TEXT,
-        timestamp TEXT DEFAULT (datetime('now'))
-    )
-""")
+    def __init__(self):
+        self.conn = sqlite3.connect('metrics.db')
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS metrics (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                sonde     TEXT,
+                valeur    REAL,
+                unite     TEXT,
+                timestamp TEXT DEFAULT (datetime('now'))
+            )
+        """)
+        self.conn.commit()
 
-conn.execute(
-    "INSERT INTO metrics (sonde, valeur, unite) VALUES (?, ?, ?)",
-    ("cpu", 42.5, "%")
-)
+    def save(self, sonde, valeur, unite):
+        self.conn.execute(
+            "INSERT INTO metrics (sonde, valeur, unite) VALUES (?, ?, ?)",
+            (sonde, valeur, unite)
+        )
+        self.conn.commit()
 
-# Nettoyage des données trop vieilles
-limite = datetime.now() - timedelta(days=30)
-limite_str = limite.isoformat()
-conn.execute("DELETE FROM metrics WHERE timestamp < ?", (limite_str,))
+    def cleanup(self):
+        limite = datetime.now() - timedelta(days=30)
+        limite_str = limite.isoformat()
+        self.conn.execute(
+            "DELETE FROM metrics WHERE timestamp < ?",
+            (limite_str,)
+        )
+        self.conn.commit()
 
-conn.commit()
+    def get_latest(self):
+        rows = self.conn.execute(
+            "SELECT * FROM metrics"
+        ).fetchall()
+        for row in rows:
+            print(row)
+        self.conn.close()
 
-rows = conn.execute("SELECT * FROM metrics").fetchall()
-for row in rows:
-    print(row)
 
-conn.close()
+# Test
+storage = StorageManager()
+storage.save("cpu", 42.5, "%")
+storage.cleanup()
+storage.get_latest()
