@@ -14,10 +14,12 @@ def get_latest_cert_alert():
             fin_url = ligne.find('"', debut_url)
             alerte_url = "https://www.cert.ssi.gouv.fr" + ligne[debut_url:fin_url]
 
-            # Chercher item-title dans les lignes suivantes
             for j in range(i, i + 10):
                 if "item-title" in lignes[j]:
-                    titre = lignes[j + 1].strip()
+                    ligne_titre = lignes[j + 1].strip()
+                    debut = ligne_titre.rfind(">") + 1
+                    fin = ligne_titre.find("</a>")
+                    titre = ligne_titre[debut:fin].strip()
                     print(f"URL   : {alerte_url}")
                     print(f"Titre : {titre}")
                     return
