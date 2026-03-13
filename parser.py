@@ -14,13 +14,14 @@ def get_latest_cert_alert():
             fin_url = ligne.find('"', debut_url)
             alerte_url = "https://www.cert.ssi.gouv.fr" + ligne[debut_url:fin_url]
             
-            # Extraire le titre → tout ce qui est entre > et </a>
-            debut_titre = ligne.find(">") + 1
+            # Extraire le titre → chercher le 2ème >
+            premier = ligne.find(">")
+            deuxieme = ligne.find(">", premier + 1)
             fin_titre = ligne.find("</a>")
-            titre = ligne[debut_titre:fin_titre].strip()
+            titre = ligne[deuxieme + 1:fin_titre].strip()
             
             print(f"URL : {alerte_url}")
-            print(f"Titre brut : '{titre}'")
+            print(f"Titre : '{titre}'")
             return
 
 get_latest_cert_alert()
