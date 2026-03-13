@@ -13,7 +13,7 @@ def collecter_cpu():
 def collecter_ram():
     """Sonde RAM via ton ram.sh"""
     result = subprocess.run(
-        ["bash", "ram.sh"],
+        ["bash", "/home/leojaubert/projet-developpement-d-un-outil/ram.sh"],
         capture_output=True, text=True
     )
     # Extraire le pourcentage depuis la sortie "Utilisation de la RAM : 42.50%"
@@ -28,7 +28,7 @@ def collecter_ram():
 def collecter_disque():
     """Sonde disque via ton disque.sh"""
     result = subprocess.run(
-        ["bash", "disque.sh"],
+        ["bash", "/home/leojaubert/projet-developpement-d-un-outil/disque.sh"],
         capture_output=True, text=True
     )
     print(result.stdout.strip())
