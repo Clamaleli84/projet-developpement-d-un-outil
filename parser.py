@@ -2,7 +2,7 @@ import requests
 import xml.etree.ElementTree as ET
 import json
 import os
-from stockage import StorageManager
+from storage import StorageManager
 
 url = "https://www.cert.ssi.gouv.fr/feed/"
 json_file = "derniere_alerte.json"
@@ -40,6 +40,6 @@ if item is not None:
 
     print(f"Nouvelle alerte enregistrée : '{titre[:30]}...'")
 
-    # Envoi au moteur de stockage
+    # Envoi au moteur de storage
     storage = StorageManager()
     storage.save("CERT", 0, titre)
