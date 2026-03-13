@@ -15,7 +15,6 @@ def generer_graphique(sonde):
     graphique.x_labels = timestamps
     graphique.add(sonde, valeurs)
     graphique.render_to_file(f"{sonde}.svg")
-    cairosvg.svg2png(url=f"{sonde}.svg", write_to=f"{sonde}.png")  # ← conversion juste après
     print(f"Graphique généré : {sonde}.png")
 
 # Générer pour chaque sonde
