@@ -22,7 +22,6 @@ class StorageManager:
             "SELECT id FROM metrics WHERE sonde = ? AND timestamp > ?",
             (sonde, depuis)
             ).fetchone()
-        print(f"exists({sonde}) → {row}")
         return row is not None
     
     def save(self, sonde, valeur, unite):
