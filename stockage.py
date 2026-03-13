@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 conn = sqlite3.connect('metrics.db')
 
@@ -17,12 +18,15 @@ conn.execute(
     ("cpu", 42.5, "%")
 )
 
-conn.commit() 
+# Nettoyage des données trop vieilles
+limite = datetime.now() - timedelta(days=30)
+limite_str = limite.isoformat()
+conn.execute("DELETE FROM metrics WHERE timestamp < ?", (limite_str,))
 
-# PUIS on lit
+conn.commit()
+
 rows = conn.execute("SELECT * FROM metrics").fetchall()
-    
 for row in rows:
     print(row)
 
-conn.close()  
+conn.close()
