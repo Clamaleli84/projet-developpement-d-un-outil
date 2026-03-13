@@ -10,11 +10,16 @@ def get_latest_cert_alert():
     lignes = html.split("\n")
     for i, ligne in enumerate(lignes):
         if "CERTFR" in ligne and "href" in ligne:
-            print(f"ligne {i}   : '{ligne.strip()}'")
-            print(f"ligne {i+1} : '{lignes[i+1].strip()}'")
-            print(f"ligne {i+2} : '{lignes[i+2].strip()}'")
-            print(f"ligne {i+3} : '{lignes[i+3].strip()}'")
-            print(f"ligne {i+4} : '{lignes[i+4].strip()}'")
-            return
+            debut_url = ligne.find('href="') + 6
+            fin_url = ligne.find('"', debut_url)
+            alerte_url = "https://www.cert.ssi.gouv.fr" + ligne[debut_url:fin_url]
+
+            # Chercher item-title dans les lignes suivantes
+            for j in range(i, i + 10):
+                if "item-title" in lignes[j]:
+                    titre = lignes[j + 1].strip()
+                    print(f"URL   : {alerte_url}")
+                    print(f"Titre : {titre}")
+                    return
 
 get_latest_cert_alert()
