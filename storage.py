@@ -41,10 +41,8 @@ class StorageManager:
         self.conn.commit()
 
     def get_history(self, sonde):
-    rows = self.conn.execute(
-        "SELECT valeur, timestamp FROM metrics WHERE sonde = ? ORDER BY timestamp ASC",
-        (sonde,)
-    ).fetchall()
+        rows = self.conn.execute(
+            "SELECT valeur, timestamp FROM metrics WHERE sonde = ? ORDER BY timestamp ASC",(sonde,)).fetchall()
     return rows
     
     def get_latest(self):
