@@ -16,7 +16,7 @@ config_defaut = {
     "admin_email": "matteo.jaubert@alumni.univ-avignon.fr",
     "smtp_server": "pedago.univ-avignon.fr",
     "smtp_port": 465,
-    "smtp_user": "matteo.jaubert@alumni.univ-avignon.fr",
+    "smtp_user": "leo.jaubert@alumni.univ-avignon.fr",
     "smtp_pass": "mdp"
 }
 
