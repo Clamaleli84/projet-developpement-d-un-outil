@@ -101,4 +101,4 @@ if stats:
     else:
         print(f"OK. CPU:{stats['cpu']} RAM:{stats['ram']} DISK:{stats['disk']}")
 else:
-    print("Erreur : Impossible de lire les données JSON.")
+    print("Erreur : Impossible de lire les données DB.")
