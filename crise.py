@@ -67,13 +67,16 @@ def send_mail(stats):
     with open(template_file, 'r') as f:
         content = f.read().format(**stats)
 
-    # Ajouter les graphiques SVG directement dans le HTML
+    # Ajouter les graphiques PNG en base64 dans le HTML
     for sonde in ["cpu", "ram", "disque"]:
-        fichier = f"{sonde}.svg"
-        if os.path.exists(fichier):
-            with open(fichier, 'r') as f:
-                svg_content = f.read()
-            content += f"<h3>{sonde}</h3>" + svg_content
+        fichier_png = f"{sonde}.png"
+        if os.path.exists(fichier_png):
+            with open(fichier_png, 'rb') as f:
+                png_base64 = base64.b64encode(f.read()).decode('utf-8')
+            content += f"""
+            <h3>Graphique {sonde}</h3>
+            <img src="data:image/png;base64,{png_base64}">
+            """
 
     msg = EmailMessage()
     msg.set_content(content, subtype='html')
