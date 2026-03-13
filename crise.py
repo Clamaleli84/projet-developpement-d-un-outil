@@ -10,7 +10,7 @@ template_file = os.path.join(config_dir, "template_mail.html")
 data_file = "derniere_alerte.json"
 
 config_defaut = {
-    "cpu_threshold": 0.0,
+    "cpu_threshold": 80.0,
     "ram_threshold": 85.0,
     "disk_threshold": 90.0,
     "admin_email": "leo.jaubert@alumni.univ-avignon.fr",
