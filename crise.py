@@ -8,7 +8,6 @@ from graphique import generer_graphique
 config_dir = "config"
 config_file = os.path.join(config_dir, "crisis_config.json")
 template_file = os.path.join(config_dir, "template_mail.html")
-data_file = "derniere_alerte.json"
 
 config_defaut = {
     "cpu_threshold": 80.0,
@@ -48,9 +47,7 @@ def init_files():
 def get_data_from_db():
     storage = StorageManager()
     rows = storage.get_latest()
-    
     stats = {"cpu": None, "ram": None, "disk": None}
-    
     for row in rows:
         id, sonde, valeur, unite, timestamp = row
         if sonde == "cpu" and stats["cpu"] is None:
@@ -59,31 +56,20 @@ def get_data_from_db():
             stats["ram"] = valeur
         elif sonde == "disque" and stats["disk"] is None:
             stats["disk"] = valeur
-    
     if None in stats.values():
         return None
     return stats
-    
-if is_crisis:
-    print(f"ALERTE CRISE ! CPU:{stats['cpu']} RAM:{stats['ram']} DISK:{stats['disk']}")
-    generer_graphique("cpu")      # ← générer avant d'envoyer
-    generer_graphique("ram")
-    generer_graphique("disque")
-    send_mail(stats)
 
 def send_mail(stats):
     with open(config_file, 'r') as f:
         config = json.load(f)
     with open(template_file, 'r') as f:
         content = f.read().format(**stats)
-
     msg = EmailMessage()
     msg.set_content(content, subtype='html')
     msg['Subject'] = "[AUTOMATIQUE] Crise : Alerte Ressources Serveur"
     msg['From'] = config["smtp_user"]
     msg['To'] = config["admin_email"]
-
-    # Joindre les graphiques SVG
     for sonde in ["cpu", "ram", "disque"]:
         fichier = f"{sonde}.svg"
         if os.path.exists(fichier):
@@ -95,7 +81,6 @@ def send_mail(stats):
                     filename=fichier
                 )
             print(f"Pièce jointe ajoutée : {fichier}")
-
     try:
         with smtplib.SMTP_SSL(config["smtp_server"], config["smtp_port"]) as server:
             server.login(config["smtp_user"], config["smtp_pass"])
@@ -104,19 +89,20 @@ def send_mail(stats):
     except Exception as e:
         print(f"Erreur d'envoi SMTP : {e}")
 
+# Programme principal
 init_files()
 stats = get_data_from_db()
-
 if stats:
     with open(config_file, 'r') as f:
         config = json.load(f)
-
-    is_crisis = (stats["cpu"] >= config["cpu_threshold"] or 
-                 stats["ram"] >= config["ram_threshold"] or 
+    is_crisis = (stats["cpu"] >= config["cpu_threshold"] or
+                 stats["ram"] >= config["ram_threshold"] or
                  stats["disk"] >= config["disk_threshold"])
-
     if is_crisis:
         print(f"ALERTE CRISE ! CPU:{stats['cpu']} RAM:{stats['ram']} DISK:{stats['disk']}")
+        generer_graphique("cpu")
+        generer_graphique("ram")
+        generer_graphique("disque")
         send_mail(stats)
     else:
         print(f"OK. CPU:{stats['cpu']} RAM:{stats['ram']} DISK:{stats['disk']}")
