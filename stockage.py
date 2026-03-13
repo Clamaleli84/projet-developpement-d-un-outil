@@ -21,7 +21,7 @@ conn.commit()
 
 # PUIS on lit
 rows = conn.execute("SELECT * FROM metrics").fetchall()
-
+    
 for row in rows:
     print(row)
 
