@@ -33,11 +33,8 @@ class StorageManager:
         self.conn.commit()
 
     def get_latest(self):
-        rows = self.conn.execute(
-            "SELECT * FROM metrics"
-        ).fetchall()
-        for row in rows:
-            print(row)
+        rows = self.conn.execute("SELECT * FROM metrics").fetchall()
+        return rows
         self.conn.close()
 
 
