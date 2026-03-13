@@ -1,6 +1,7 @@
 import json
 import os
 import smtplib
+import base64
 from email.message import EmailMessage
 from storage import StorageManager
 from graphique import generer_graphique
@@ -65,22 +66,21 @@ def send_mail(stats):
         config = json.load(f)
     with open(template_file, 'r') as f:
         content = f.read().format(**stats)
+
+    # Ajouter les graphiques SVG directement dans le HTML
+    for sonde in ["cpu", "ram", "disque"]:
+        fichier = f"{sonde}.svg"
+        if os.path.exists(fichier):
+            with open(fichier, 'r') as f:
+                svg_content = f.read()
+            content += f"<h3>{sonde}</h3>" + svg_content
+
     msg = EmailMessage()
     msg.set_content(content, subtype='html')
     msg['Subject'] = "[AUTOMATIQUE] Crise : Alerte Ressources Serveur"
     msg['From'] = config["smtp_user"]
     msg['To'] = config["admin_email"]
-    for sonde in ["cpu", "ram", "disque"]:
-        fichier = f"{sonde}.svg"
-        if os.path.exists(fichier):
-            with open(fichier, 'rb') as f:
-                msg.add_attachment(
-                    f.read(),
-                    maintype='image',
-                    subtype='svg+xml',
-                    filename=fichier
-                )
-            print(f"Pièce jointe ajoutée : {fichier}")
+
     try:
         with smtplib.SMTP_SSL(config["smtp_server"], config["smtp_port"]) as server:
             server.login(config["smtp_user"], config["smtp_pass"])
