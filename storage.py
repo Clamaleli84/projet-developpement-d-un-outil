@@ -19,7 +19,8 @@ class StorageManager:
     def exists(self, sonde):
         depuis = (datetime.now() - timedelta(minutes=5)).isoformat()
         row = self.conn.execute("SELECT id FROM metrics WHERE sonde = ? AND timestamp > ?",(sonde, depuis)).fetchone()
-        return row is not None  # True si elle existe, False sinon
+        print(f"exists({sonde}) → {row}")
+        return row is not None  
     
     def save(self, sonde, valeur, unite):
         if self.exists(sonde):
