@@ -26,17 +26,25 @@ def collecter_machine(machine):
         ram = psutil.virtual_memory().percent
         disque = psutil.disk_usage('/').percent
     else:
-        # DISTANT (SSH) - On utilise des commandes directes pour éviter les scripts manquants
-        cpu_raw = collecter_distant(host, "uptime | awk '{print $NF}' | sed 's/,/./'")
-        ram_raw = collecter_distant(host, "free | grep Mem | awk '{print $3/$2 * 100.0}'")
-        disque_raw = collecter_distant(host, "df / | tail -1 | awk '{print $5}' | sed 's/%//'")
-        
+        # --- COLLECTE DISTANTE ---
+        # On utilise des noms de variables très différents pour éviter tout mélange
+        res_cpu = collecter_distant(host, "top -bn1 | grep 'Cpu(s)' | awk '{print $2}'")
+        res_ram = collecter_distant(host, "free | grep Mem | awk '{print $3/$2 * 100.0}'")
+        res_dis = collecter_distant(host, "df / | tail -1 | awk '{print $5}' | sed 's/%//'")
+
         try:
-            cpu = float(cpu_raw) if cpu_raw else 0.0
-            ram = float(ram_raw) if ram_raw else 0.0
-            disque = float(disque_raw) if disque_raw else 0.0
-        except:
-            cpu, ram, disque = 0.0, 0.0, 0.0
+            # On remplace les virgules par des points (important pour le float)
+            val_cpu = float(res_cpu.replace(',', '.')) if res_cpu else 0.1
+            val_ram = float(res_ram.replace(',', '.')) if res_ram else 0.1
+            val_dis = float(res_dis.replace(',', '.')) if res_dis else 0.1
+            
+            # SAUVEGARDE STRICTE
+            storage.save("cpu", val_cpu, "%")
+            storage.save("ram", val_ram, "%")
+            storage.save("disque", val_dis, "%")
+            print(f">>> DISTANT [{nom}] : CPU={val_cpu}, RAM={val_ram}")
+        except Exception as e:
+            print(f"Erreur distant {nom}: {e}")
 
     storage.save("cpu", cpu, "%")
     storage.save("ram", ram, "%")
