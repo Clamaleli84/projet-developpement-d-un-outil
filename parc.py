@@ -1,48 +1,48 @@
+import subprocess
+from storage import StorageManager
+import psutil
+
+MACHINES = [
+    {"nom": "vm_locale", "host": None},
+    {"nom": "ordi_local", "host": "uapv2401108@pedago.univ-avignon.fr"}
+]
+
+def collecter_distant(host, commande):
+    try:
+        result = subprocess.run(["ssh", "-o", "ConnectTimeout=5", host, commande], 
+                                capture_output=True, text=True, timeout=10)
+        return result.stdout.strip()
+    except:
+        return ""
+
 def collecter_machine(machine):
-    host = machine["host"]
     nom = machine["nom"]
+    host = machine["host"]
     storage = StorageManager(db_path=f"metrics_{nom}.db")
 
     if host is None:
-        # --- MACHINE LOCALE (déjà OK en général) ---
-        import psutil
-        cpu = psutil.cpu_percent(interval=1)
-        storage.save("cpu", cpu, "%")
-        
-        # Pour RAM et Disque locaux, on utilise psutil aussi pour être plus fiable que le bash
+        # LOCAL
+        cpu = psutil.cpu_percent(interval=0.5)
         ram = psutil.virtual_memory().percent
-        storage.save("ram", ram, "%")
-        
         disque = psutil.disk_usage('/').percent
-        storage.save("disque", disque, "%")
-        print(f"[{nom}] Local - CPU: {cpu}%, RAM: {ram}%, DISQUE: {disque}%")
-
     else:
-        # --- MACHINE DISTANTE (SSH) ---
-        print(f"[{nom}] Connexion à {host}...")
+        # DISTANT (SSH) - On utilise des commandes directes pour éviter les scripts manquants
+        cpu_raw = collecter_distant(host, "uptime | awk '{print $NF}' | sed 's/,/./'")
+        ram_raw = collecter_distant(host, "free | grep Mem | awk '{print $3/$2 * 100.0}'")
+        disque_raw = collecter_distant(host, "df / | tail -1 | awk '{print $5}' | sed 's/%//'")
         
-        # CPU distant plus fiable (moyenne sur 1 seconde via mpstat ou calcul simple)
-        # On utilise une commande qui marche à tous les coups :
-        cmd_cpu = "grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage}'"
-        cpu_str = collecter_distant(host, cmd_cpu)
-        
-        # RAM distante (sans dépendre du script .sh qui peut manquer)
-        cmd_ram = "free | grep Mem | awk '{print $3/$2 * 100.0}'"
-        ram_str = collecter_distant(host, cmd_ram)
-        
-        # DISQUE distant (racine /)
-        cmd_disque = "df / | tail -1 | awk '{print $5}' | sed 's/%//'"
-        disque_str = collecter_distant(host, cmd_disque)
-
         try:
-            cpu = round(float(cpu_str), 2)
-            ram = round(float(ram_str), 2)
-            disque = round(float(disque_str), 2)
-            
-            storage.save("cpu", cpu, "%")
-            storage.save("ram", ram, "%")
-            storage.save("disque", disque, "%")
-            print(f"[{nom}] Distant - CPU: {cpu}%, RAM: {ram}%, DISQUE: {disque}%")
-        except Exception as e:
-            print(f"[{nom}] Erreur lors de la conversion des données distantes : {e}")
-            print(f"Brut reçu -> CPU: {cpu_str}, RAM: {ram_str}, DISK: {disque_str}")
+            cpu = float(cpu_raw) if cpu_raw else 0.0
+            ram = float(ram_raw) if ram_raw else 0.0
+            disque = float(disque_raw) if disque_raw else 0.0
+        except:
+            cpu, ram, disque = 0.0, 0.0, 0.0
+
+    storage.save("cpu", cpu, "%")
+    storage.save("ram", ram, "%")
+    storage.save("disque", disque, "%")
+    print(f"[{nom}] Données sauvegardées : CPU {cpu}%, RAM {ram}%, DISQUE {disque}%")
+
+if __name__ == "__main__":
+    for m in MACHINES:
+        collecter_machine(m)
