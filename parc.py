@@ -58,3 +58,14 @@ def collecter_machine(machine):
 if __name__ == "__main__":
     for machine in MACHINES:
         collecter_machine(machine)
+# CPU
+cpu_str = collecter_distant(host, "python3 ~/Donnees_itinerantes/developpe_outil/cpu.py")
+print(f"[{nom}] CPU brut : '{cpu_str}'")
+
+# RAM
+ram_str = collecter_distant(host, "bash ~/Donnees_itinerantes/developpe_outil/ram.sh")
+print(f"[{nom}] RAM brut : '{ram_str}'")
+
+# Disque
+disque_str = collecter_distant(host, "bash ~/Donnees_itinerantes/developpe_outil/disque.sh")
+print(f"[{nom}] Disque brut : '{disque_str}'")
