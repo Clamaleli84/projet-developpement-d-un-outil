@@ -2,10 +2,7 @@ import subprocess
 from storage import StorageManager
 import psutil
 
-MACHINES = [
-    {"nom": "vm_locale", "host": None},
-    {"nom": "ordi_local", "host": "uapv2401108@pedago.univ-avignon.fr"}
-]
+MACHINES = [{"nom": "vm_locale", "host": None}, {"nom": "ordi_local", "host": "uapv2401108@pedago.univ-avignon.fr"}]
 
 def collecter_distant(host, commande):
     try:
@@ -15,43 +12,30 @@ def collecter_distant(host, commande):
         return result.stdout.strip()
     except Exception:
         return ""
+        
+
 
 def collecter_machine(machine):
-    nom = machine["nom"]
-    host = machine["host"]
+    nom, host = machine["nom"], machine["host"]
     storage = StorageManager(db_path=f"metrics_{nom}.db")
-
-    # Initialisation des variables pour éviter l'UnboundLocalError
-    cpu, ram, disque = 0.0, 0.0, 0.0
+    cpu, ram, disque = 0.0, 0.0, 0.0 # On initialise pour éviter les erreurs
 
     if host is None:
-        # --- COLLECTE LOCALE ---
-        cpu = psutil.cpu_percent(interval=0.5)
-        ram = psutil.virtual_memory().percent
+        cpu, ram = psutil.cpu_percent(interval=1), psutil.virtual_memory().percent
         disque = psutil.disk_usage('/').percent
-        print(f"[{nom}] Local - CPU: {cpu}%, RAM: {ram}%")
     else:
-        # --- COLLECTE DISTANTE ---
-        res_cpu = collecter_distant(host, "top -bn1 | grep 'Cpu(s)' | awk '{print $2}'")
-        res_ram = collecter_distant(host, "free | grep Mem | awk '{print $3/$2 * 100.0}'")
-        res_dis = collecter_distant(host, "df / | tail -1 | awk '{print $5}' | sed 's/%//'")
-        
+        # On utilise des commandes SSH directes pour le serveur pedago
+        c = lambda cmd: subprocess.run(["ssh", host, cmd], capture_output=True, text=True).stdout.strip()
         try:
-            # On utilise float(x.replace(',', '.')) car les systèmes FR utilisent la virgule
-            cpu = float(res_cpu.replace(',', '.')) if res_cpu else 0.5
-            ram = float(res_ram.replace(',', '.')) if res_ram else 15.0
-            disque = float(res_dis.replace(',', '.')) if res_dis else 10.0
-            print(f">>> [{nom}] Distant - CPU: {cpu}%, RAM: {ram}%")
-        except Exception as e:
-            print(f"[{nom}] Erreur conversion SSH: {e}")
-            # Valeurs par défaut différentes pour bien voir la distinction sur le graphe
-            cpu, ram, disque = 1.0, 20.0, 30.0
+            cpu = float(c("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'").replace(',', '.'))
+            ram = float(c("free | grep Mem | awk '{print $3/$2 * 100.0}'").replace(',', '.'))
+            disque = float(c("df / | tail -1 | awk '{print $5}'").replace('%',''))
+        except: pass
 
-    # Sauvegarde dans la base spécifique
     storage.save("cpu", cpu, "%")
     storage.save("ram", ram, "%")
     storage.save("disque", disque, "%")
+    print(f"[{nom}] OK : CPU {cpu}% | RAM {ram}%")
 
 if __name__ == "__main__":
-    for m in MACHINES:
-        collecter_machine(m)
+    for m in MACHINES: collecter_machine(m)
