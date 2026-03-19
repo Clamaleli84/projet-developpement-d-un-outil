@@ -1,5 +1,6 @@
 import pygal
 from storage import StorageManager
+import cairosvg
 
 MACHINES = ["vm_locale", "ordi_local"]
 
@@ -16,7 +17,8 @@ def generer_graphique(sonde, nom_machine):
     graphique.x_labels = timestamps
     graphique.add(sonde, valeurs)
     graphique.render_to_file(f"{sonde}_{nom_machine}.svg")
-    print(f"Graphique généré : {sonde}_{nom_machine}.svg")
+    cairosvg.svg2png(url=f"{sonde}_{nom_machine}.svg", write_to=f"{sonde}_{nom_machine}.png")
+    print(f"Graphique généré : {sonde}_{nom_machine}.png")
 
 for machine in MACHINES:
     generer_graphique("cpu", machine)
