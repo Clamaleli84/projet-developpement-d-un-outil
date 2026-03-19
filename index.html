@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Monitoring</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; text-align: center; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; }
+        .card { background: white; margin: 10px; padding: 15px; border-radius: 8px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        img { max-width: 450px; height: auto; border: 1px solid #ddd; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>📊 Dashboard de Surveillance</h1>
+    
+    <div class="container">
+        {% for machine in machines %}
+            <div class="machine-section">
+                <h2>Machine : {{ machine }}</h2>
+                <div class="container">
+                    <div class="card">
+                        <h3>CPU</h3>
+                        <img src="{{ url_for('static', filename='cpu_' + machine + '.png') }}" alt="CPU">
+                    </div>
+                    <div class="card">
+                        <h3>RAM</h3>
+                        <img src="{{ url_for('static', filename='ram_' + machine + '.png') }}" alt="RAM">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
