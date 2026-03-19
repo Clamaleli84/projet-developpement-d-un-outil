@@ -6,21 +6,20 @@ import subprocess
 app = Flask(__name__)
 
 def rafraichir_tout():
-    """Lance la collecte, la génération et déplace les images."""
-    try:
-        # 1. Lancer la collecte du parc (parc.py)
-        subprocess.run(["python3", "parc.py"], check=True)
-        # 2. Lancer la génération des graphiques (graphique.py)
-        subprocess.run(["python3", "graphique.py"], check=True)
-        
-        # 3. Déplacer les PNG vers static/
-        if not os.path.exists('static'):
-            os.makedirs('static')
-        for f in os.listdir('.'):
-            if f.endswith(".png"):
-                shutil.move(f, os.path.join('static', f))
-    except Exception as e:
-        print(f"Erreur lors du rafraîchissement : {e}")
+    # On supprime les anciens PNG dans static avant de mettre les nouveaux
+    for f in os.listdir('static'):
+        if f.endswith(".png"):
+            os.remove(os.path.join('static', f))
+            
+    # On lance les scripts
+    subprocess.run(["python3", "parc.py"])
+    subprocess.run(["python3", "graphique.py"])
+    
+    # On déplace les nouveaux
+    for f in os.listdir('.'):
+        if f.endswith(".png"):
+            # On utilise shutil.move pour écraser proprement
+            shutil.move(f, os.path.join('static', f))
 
 @app.route("/")
 def index():
