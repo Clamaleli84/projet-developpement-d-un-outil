@@ -2,18 +2,27 @@ import sqlite3
 from datetime import datetime, timedelta
 
 class StorageManager:
+    def __init__(self, db_path):
+        self.db_path = db_path
+        self.conn = sqlite3.connect(self.db_path)
+        self.create_table()
 
-    def __init__(self, db_path="metrics.db"):
-        self.conn = sqlite3.connect('db_path')
-        self.conn.execute("""
-            CREATE TABLE IF NOT EXISTS metrics (
-                id        INTEGER PRIMARY KEY AUTOINCREMENT,
-                sonde     TEXT,
-                valeur    REAL,
-                unite     TEXT,
-                timestamp TEXT DEFAULT (datetime('now'))
-            )
-        """)
+    def create_table(self):
+        query = """
+        CREATE TABLE IF NOT EXISTS metrics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sonde TEXT,
+            val REAL,
+            unit TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+        self.conn.execute(query)
+        self.conn.commit()
+
+    def save(self, sonde, val, unit):
+        query = "INSERT INTO metrics (sonde, val, unit) VALUES (?, ?, ?)"
+        self.conn.execute(query, (sonde, val, unit))
         self.conn.commit()
         
     def exists(self, sonde):
@@ -23,13 +32,6 @@ class StorageManager:
             (sonde, depuis)
             ).fetchone()
         return row is not None
-    
-    def save(self, sonde, valeur, unite):
-        if self.exists(sonde):
-            print(f"⚠ {sonde} déjà enregistré récemment, on ignore.")
-            return
-        self.conn.execute("INSERT INTO metrics (sonde, valeur, unite) VALUES (?, ?, ?)",(sonde, valeur, unite))
-        self.conn.commit()
 
     def cleanup(self):
         limite = datetime.now() - timedelta(days=30)
