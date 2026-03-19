@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 class StorageManager:
 
-    def __init__(self):
+    def __init__(self, db_path="metrics.db"):
         self.conn = sqlite3.connect('metrics.db')
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS metrics (
