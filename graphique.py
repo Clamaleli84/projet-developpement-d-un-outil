@@ -6,7 +6,7 @@ MACHINES = ["vm_locale", "ordi_local"]
 
 def generer_graphique(sonde, nom_machine):
     # CRITIQUE : Vérifie bien que nom_machine est utilisé ici
-    storage = StorageManager(db_path=f"metrics_{nom_machine}.db")
+   storage = StorageManager(db_path=f"metrics_{nom_machine}.db")
     rows = storage.get_history(sonde)
     
     if not rows:
