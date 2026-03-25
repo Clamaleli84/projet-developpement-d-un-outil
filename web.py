@@ -29,5 +29,5 @@ def index():
     return render_template("index.html", machines=machines, metriques=metriques)
 
 if __name__ == "__main__":
-    # On utilise le port 5000 (pense à la redirection de port VirtualBox)
+    # On utilise le port 5000
     app.run(host="0.0.0.0", port=5000, debug=True)
